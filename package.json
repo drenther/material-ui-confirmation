@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "React hook to seamlessly use customizable confirmation dialogs from @material-ui/core without managing any open/close state",
   "author": "drenther",
+  "keywords": ["react", "react-hooks", "material-ui", "dialog", "confirm"],
   "license": "MIT",
   "repository": "drenther/material-ui-confirmation",
   "main": "dist/index.js",
