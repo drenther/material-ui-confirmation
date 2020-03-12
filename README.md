@@ -10,22 +10,73 @@
 npm install --save material-ui-confirmation
 ```
 
+```bash
+yarn add material-ui-confirmation
+```
+
 ## Usage
 
+Wrap your app with the `ConfirmationDialogProvider`
+
 ```tsx
-import * as React from 'react'
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { ConfirmationDialogProvider } from 'material-ui-confirmation';
 
-import { useMyHook } from 'material-ui-confirmation'
+import App from './App';
 
-const Example = () => {
-  const example = useMyHook()
-  return (
-    <div>
-      {example}
-    </div>
-  )
-}
+ReactDOM.render(
+  <ConfirmationDialogProvider>
+    <App />
+  </ConfirmationDialogProvider>,
+  document.getElementById('root'),
+);
 ```
+
+Then use the `useConfirmationDialog` hook anywhere down the line
+
+```jsx
+import React from 'react';
+
+import { useConfirmationDialog } from 'material-ui-confirmation';
+
+const App = () => {
+  const { getConfirmation } = useConfirmationDialog();
+
+  return (
+    <button
+      onClick={() => {
+        getConfirmation({
+          title: 'Is it working?',
+          body: "Let's check if it is working",
+          onAccept: () => {
+            alert('Accepted');
+          },
+          onDecline: () => {
+            alert('Declined');
+          },
+          dialogProps: {
+            disableBackdropClick: true,
+          },
+          acceptButtonProps: {
+            autoFocus: false,
+            variant: 'contained',
+          },
+          declineText: 'Leave me alone',
+        });
+      }}
+    >
+      Confirm
+    </button>
+  );
+};
+
+export default App;
+```
+
+## API Reference
+
+Coming Soon
 
 ## License
 

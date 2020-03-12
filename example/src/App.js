@@ -1,13 +1,36 @@
-import React from 'react'
+import React from 'react';
 
-import { useMyHook } from 'material-ui-confirmation'
+import { useConfirmationDialog } from 'material-ui-confirmation';
 
 const App = () => {
-  const example = useMyHook()
+  const { getConfirmation } = useConfirmationDialog();
+
   return (
-    <div>
-      {example}
-    </div>
-  )
-}
-export default App
+    <button
+      onClick={() => {
+        getConfirmation({
+          title: 'Is it working?',
+          body: "Let's check if it is working",
+          onAccept: () => {
+            alert('Accepted');
+          },
+          onDecline: () => {
+            alert('Declined');
+          },
+          dialogProps: {
+            disableBackdropClick: true,
+          },
+          acceptButtonProps: {
+            autoFocus: false,
+            variant: 'contained',
+          },
+          declineText: 'Leave me alone',
+        });
+      }}
+    >
+      Confirm
+    </button>
+  );
+};
+
+export default App;

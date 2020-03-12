@@ -1,7 +1,12 @@
-import React from 'react'
-import ReactDOM from 'react-dom'
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { ConfirmationDialogProvider } from 'material-ui-confirmation';
 
-import './index.css'
-import App from './App'
+import App from './App';
 
-ReactDOM.render(<App />, document.getElementById('root'))
+ReactDOM.render(
+  <ConfirmationDialogProvider>
+    <App />
+  </ConfirmationDialogProvider>,
+  document.getElementById('root'),
+);
