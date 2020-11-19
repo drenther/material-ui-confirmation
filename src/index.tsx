@@ -1,17 +1,14 @@
 import * as React from 'react';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContentText,
-  DialogContent,
-  DialogActions,
-  Button,
-  ButtonProps,
-  DialogProps,
-} from '@material-ui/core';
+import Button, { ButtonProps } from '@material-ui/core/Button';
+import Dialog, { DialogProps } from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogActions from '@material-ui/core/DialogActions';
 
 const noop = (_x?: any) => {};
-type Noop = typeof noop;
+
+type ActionFn = (() => void) | (() => Promise<void>);
 
 enum DialogActionTypes {
   OpenDialog = 'open',
@@ -22,8 +19,8 @@ interface DialogActionPayload {
   title: string;
   body: React.ReactNode;
   dialogProps?: DialogProps;
-  onAccept?: Noop;
-  onDecline?: Noop;
+  onAccept?: ActionFn;
+  onDecline?: ActionFn;
   acceptText?: string;
   declineText?: string;
   declineButtonProps?: ButtonProps;
@@ -93,8 +90,8 @@ export const ConfirmationDialogProvider: React.FC = ({ children }) => {
           <Button
             color="default"
             {...(dialogState.declineButtonProps || {})}
-            onClick={() => {
-              dialogState.onDecline && dialogState.onDecline();
+            onClick={async () => {
+              dialogState.onDecline && (await dialogState.onDecline());
               closeDialog();
             }}
           >
@@ -104,8 +101,8 @@ export const ConfirmationDialogProvider: React.FC = ({ children }) => {
             color="primary"
             autoFocus
             {...(dialogState.acceptButtonProps || {})}
-            onClick={() => {
-              dialogState.onAccept && dialogState.onAccept();
+            onClick={async () => {
+              dialogState.onAccept && (await dialogState.onAccept());
               closeDialog();
             }}
           >
