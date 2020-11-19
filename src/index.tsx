@@ -8,7 +8,9 @@ import DialogActions from '@material-ui/core/DialogActions';
 
 const noop = (_x?: any) => {};
 
-type ActionFn = (() => void) | (() => Promise<void>);
+type ActionFn =
+  | ((toggleBtnsEnabled: React.Dispatch<React.SetStateAction<boolean>>) => void)
+  | ((toggleBtnsEnabled: React.Dispatch<React.SetStateAction<boolean>>) => Promise<void>);
 
 enum DialogActionTypes {
   OpenDialog = 'open',
@@ -68,6 +70,8 @@ export const ConfirmationDialogProvider: React.FC = ({ children }) => {
     dispatch({ type: DialogActionTypes.OpenDialog, payload });
   };
 
+  const [btnsEnabled, toggleBtnsEnabled] = React.useState(true);
+
   return (
     <ConfirmationDialogContext.Provider value={{ getConfirmation: openDialog }}>
       {children}
@@ -90,8 +94,10 @@ export const ConfirmationDialogProvider: React.FC = ({ children }) => {
           <Button
             color="default"
             {...(dialogState.declineButtonProps || {})}
+            disabled={!btnsEnabled}
             onClick={async () => {
-              dialogState.onDecline && (await dialogState.onDecline());
+              toggleBtnsEnabled(false);
+              dialogState.onDecline && (await dialogState.onDecline(toggleBtnsEnabled));
               closeDialog();
             }}
           >
@@ -101,8 +107,10 @@ export const ConfirmationDialogProvider: React.FC = ({ children }) => {
             color="primary"
             autoFocus
             {...(dialogState.acceptButtonProps || {})}
+            disabled={!btnsEnabled}
             onClick={async () => {
-              dialogState.onAccept && (await dialogState.onAccept());
+              toggleBtnsEnabled(false);
+              dialogState.onAccept && (await dialogState.onAccept(toggleBtnsEnabled));
               closeDialog();
             }}
           >
