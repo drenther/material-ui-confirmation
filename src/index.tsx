@@ -5,12 +5,16 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogActions from '@material-ui/core/DialogActions';
+import CircularProgress, { CircularProgressProps } from '@material-ui/core/CircularProgress';
 
 const noop = (_x?: any) => {};
 
-type ActionFn =
-  | ((toggleBtnsEnabled: React.Dispatch<React.SetStateAction<boolean>>) => void)
-  | ((toggleBtnsEnabled: React.Dispatch<React.SetStateAction<boolean>>) => Promise<void>);
+interface HandlerFnParams {
+  resetState: () => void;
+  closeDialog: () => void;
+}
+
+type HandlerFn = ((params: HandlerFnParams) => void) | ((params: HandlerFnParams) => Promise<void>);
 
 enum DialogActionTypes {
   OpenDialog = 'open',
@@ -21,12 +25,15 @@ interface DialogActionPayload {
   title: string;
   body: React.ReactNode;
   dialogProps?: DialogProps;
-  onAccept?: ActionFn;
-  onDecline?: ActionFn;
+  onAccept?: HandlerFn;
+  onDecline?: HandlerFn;
   acceptText?: string;
   declineText?: string;
   declineButtonProps?: ButtonProps;
   acceptButtonProps?: ButtonProps;
+  enableBusyAdorment?: boolean;
+  busyAdornmentProps?: CircularProgressProps;
+  disableButtonAfterAction?: boolean;
 }
 
 type DialogAction =
@@ -63,14 +70,73 @@ const ConfirmationDialogContext = React.createContext({
 
 export const ConfirmationDialogProvider: React.FC = ({ children }) => {
   const [dialogState, dispatch] = React.useReducer(reducer, initialState);
-  const closeDialog = () => {
-    dispatch({ type: DialogActionTypes.CloseDialog });
-  };
-  const openDialog = (payload: DialogActionPayload) => {
-    dispatch({ type: DialogActionTypes.OpenDialog, payload });
-  };
 
-  const [btnsEnabled, toggleBtnsEnabled] = React.useState(true);
+  const [btnsEnabled, setBtnsEnabled] = React.useState(true);
+  const [btnPressed, setBtnPressed] = React.useState<null | 'accept' | 'decline'>(null);
+
+  const resetState = React.useCallback(() => {
+    setBtnPressed(null);
+    setBtnsEnabled(true);
+  }, []);
+  const closeDialog = React.useCallback(() => {
+    dispatch({ type: DialogActionTypes.CloseDialog });
+    resetState();
+  }, []);
+  const openDialog = React.useCallback((payload: DialogActionPayload) => {
+    dispatch({ type: DialogActionTypes.OpenDialog, payload });
+  }, []);
+
+  const acceptBtnProps = React.useMemo<ButtonProps>(
+    () => ({
+      ...(dialogState.declineButtonProps || {}),
+      ...(dialogState.disableButtonAfterAction && { disabled: !btnsEnabled }),
+      ...(dialogState.enableBusyAdorment && {
+        startIcon:
+          btnPressed === 'accept' ? (
+            <CircularProgress size={15} {...dialogState.busyAdornmentProps} />
+          ) : null,
+      }),
+    }),
+    [
+      dialogState.acceptButtonProps,
+      dialogState.enableBusyAdorment,
+      dialogState.disableButtonAfterAction,
+      btnPressed,
+      btnsEnabled,
+    ],
+  );
+  const onAccept = React.useCallback(async () => {
+    if (dialogState.onAccept) {
+      await dialogState.onAccept({ resetState, closeDialog });
+    }
+    closeDialog();
+  }, [dialogState.onAccept]);
+
+  const declineBtnProps = React.useMemo(
+    () => ({
+      ...(dialogState.declineButtonProps || {}),
+      ...(dialogState.disableButtonAfterAction && { disabled: !btnsEnabled }),
+      ...(dialogState.enableBusyAdorment && {
+        startIcon:
+          btnPressed === 'decline' ? (
+            <CircularProgress size={15} {...dialogState.busyAdornmentProps} />
+          ) : null,
+      }),
+    }),
+    [
+      dialogState.declineButtonProps,
+      dialogState.enableBusyAdorment,
+      dialogState.disableButtonAfterAction,
+      btnPressed,
+      btnsEnabled,
+    ],
+  );
+  const onDecline = React.useCallback(async () => {
+    if (dialogState.onDecline) {
+      await dialogState.onDecline({ resetState, closeDialog });
+    }
+    closeDialog();
+  }, [dialogState.onDecline]);
 
   return (
     <ConfirmationDialogContext.Provider value={{ getConfirmation: openDialog }}>
@@ -91,29 +157,10 @@ export const ConfirmationDialogProvider: React.FC = ({ children }) => {
           )}
         </DialogContent>
         <DialogActions>
-          <Button
-            color="default"
-            {...(dialogState.declineButtonProps || {})}
-            disabled={!btnsEnabled}
-            onClick={async () => {
-              toggleBtnsEnabled(false);
-              dialogState.onDecline && (await dialogState.onDecline(toggleBtnsEnabled));
-              closeDialog();
-            }}
-          >
+          <Button color="default" {...acceptBtnProps} onClick={onAccept}>
             {dialogState.declineText || 'No'}
           </Button>
-          <Button
-            color="primary"
-            autoFocus
-            {...(dialogState.acceptButtonProps || {})}
-            disabled={!btnsEnabled}
-            onClick={async () => {
-              toggleBtnsEnabled(false);
-              dialogState.onAccept && (await dialogState.onAccept(toggleBtnsEnabled));
-              closeDialog();
-            }}
-          >
+          <Button color="primary" autoFocus {...declineBtnProps} onClick={onDecline}>
             {dialogState.acceptText || 'Yes'}
           </Button>
         </DialogActions>
