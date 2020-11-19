@@ -163,10 +163,10 @@ export const ConfirmationDialogProvider: React.FC = ({ children }) => {
           )}
         </DialogContent>
         <DialogActions>
-          <Button color="default" {...acceptBtnProps} onClick={onAccept}>
+          <Button color="default" {...declineBtnProps} onClick={onDecline}>
             {dialogState.declineText || 'No'}
           </Button>
-          <Button color="primary" autoFocus {...declineBtnProps} onClick={onDecline}>
+          <Button color="primary" autoFocus {...acceptBtnProps} onClick={onAccept}>
             {dialogState.acceptText || 'Yes'}
           </Button>
         </DialogActions>
