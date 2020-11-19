@@ -31,7 +31,7 @@ interface DialogActionPayload {
   declineText?: string;
   declineButtonProps?: ButtonProps;
   acceptButtonProps?: ButtonProps;
-  enableBusyAdorment?: boolean;
+  enableBusyAdorment?: 'both' | 'accept' | 'decline';
   busyAdornmentProps?: CircularProgressProps;
   disableButtonAfterAction?: boolean;
 }
@@ -88,9 +88,10 @@ export const ConfirmationDialogProvider: React.FC = ({ children }) => {
 
   const acceptBtnProps = React.useMemo<ButtonProps>(
     () => ({
-      ...(dialogState.declineButtonProps || {}),
+      ...(dialogState.acceptButtonProps || {}),
       ...(dialogState.disableButtonAfterAction && { disabled: !btnsEnabled }),
-      ...(dialogState.enableBusyAdorment && {
+      ...((dialogState.enableBusyAdorment === 'both' ||
+        dialogState.enableBusyAdorment === 'accept') && {
         startIcon:
           btnPressed === 'accept' ? (
             <CircularProgress size={15} {...dialogState.busyAdornmentProps} />
@@ -121,7 +122,8 @@ export const ConfirmationDialogProvider: React.FC = ({ children }) => {
     () => ({
       ...(dialogState.declineButtonProps || {}),
       ...(dialogState.disableButtonAfterAction && { disabled: !btnsEnabled }),
-      ...(dialogState.enableBusyAdorment && {
+      ...((dialogState.enableBusyAdorment === 'both' ||
+        dialogState.enableBusyAdorment === 'decline') && {
         startIcon:
           btnPressed === 'decline' ? (
             <CircularProgress size={15} {...dialogState.busyAdornmentProps} />
