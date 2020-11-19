@@ -1,6 +1,6 @@
 {
   "name": "material-ui-confirmation",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "React hook to seamlessly use customizable confirmation dialogs from @material-ui/core without managing any open/close state",
   "author": "drenther",
   "keywords": [
