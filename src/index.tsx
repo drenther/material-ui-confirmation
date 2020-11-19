@@ -106,10 +106,13 @@ export const ConfirmationDialogProvider: React.FC = ({ children }) => {
     ],
   );
   const onAccept = React.useCallback(async () => {
+    setBtnPressed('accept');
+    setBtnsEnabled(false);
+
     if (dialogState.onAccept) {
       await dialogState.onAccept({ resetState, closeDialog });
     }
-    closeDialog();
+    setTimeout(closeDialog);
   }, [dialogState.onAccept]);
 
   const declineBtnProps = React.useMemo(
@@ -132,10 +135,13 @@ export const ConfirmationDialogProvider: React.FC = ({ children }) => {
     ],
   );
   const onDecline = React.useCallback(async () => {
+    setBtnPressed('decline');
+    setBtnsEnabled(false);
+
     if (dialogState.onDecline) {
       await dialogState.onDecline({ resetState, closeDialog });
     }
-    closeDialog();
+    setTimeout(closeDialog);
   }, [dialogState.onDecline]);
 
   return (
